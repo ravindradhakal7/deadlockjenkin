@@ -15,8 +15,10 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
+                echo 'Fetching code from git.'
                 // Checkout the code from your GitHub repository
                 git 'https://github.com/ravindradhakal7/deadlocktest.git'
+                echo 'After fetching the code'
             }
         }
 
