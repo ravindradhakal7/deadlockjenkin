@@ -15,11 +15,19 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                echo 'Fetching code from git.'
-                // Checkout the code from your GitHub repository
-                git 'https://github.com/ravindradhakal7/deadlocktest.git'
-                echo 'After fetching the code'
-            }
+                    echo 'Fetching code from GitHub repository.'
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: '*/main']], // Replace 'main' with your branch name
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/ravindradhakal7/deadlocktest.git',
+                            credentialsId: '088b6b3b-da23-4ca3-a68f-399f89def419' // Use the ID of the credential you added
+                        ]]
+                    ])
+                    echo 'Code checkout complete.'
+                }
         }
 
         stage('Build') {
