@@ -9,7 +9,7 @@ pipeline {
     }
 
     parameters {
-        string(name: 'VERSION', defaultValue: '1.0.2', description: 'Version of the Docker image')
+        string(name: 'VERSION', defaultValue: '1.0.1', description: 'Version of the Docker image')
     }
 
     stages {
