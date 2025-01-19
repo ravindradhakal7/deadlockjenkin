@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // DockerHub credentials stored in Jenkins Credentials
-        DOCKER_CREDENTIALS = 'docker-hub-credentials'
+        DOCKER_CREDENTIALS = 'd25f3206-196e-4456-9070-557b65a7afc1'
         DOCKER_IMAGE = 'ravindradhakal/deadlocktest'
         VERSION = '1.0.1' // This can be parameterized if needed
     }
