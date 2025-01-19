@@ -23,7 +23,7 @@ pipeline {
                         extensions: [],
                         userRemoteConfigs: [[
                             url: 'https://github.com/ravindradhakal7/deadlocktest.git',
-                            credentialsId: '32a54451-4069-4121-adf4-0ff59722bf19' // Use the ID of the credential you added
+                            credentialsId: '32d6cd06-b9ab-4237-89b9-f2728bcc5a98' // Use the ID of the credential you added
                         ]]
                     ])
                     echo 'Code checkout complete.'
