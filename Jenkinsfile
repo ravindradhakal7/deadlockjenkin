@@ -3,8 +3,10 @@ pipeline {
 
     environment {
         // DockerHub credentials stored in Jenkins Credentials
-        DOCKER_CREDENTIALS = 'd25f3206-196e-4456-9070-557b65a7afc1'
         DOCKER_IMAGE = 'ravindradhakal/deadlocktest'
+        DOCKER_REGISTRY = 'https://index.docker.io/v1/'
+        DOCKER_USER = 'ravindradhakal' // Replace with your Docker Hub username
+        DOCKER_CREDENTIALS = '2428d338-7ef1-47c4-8869-327b95a3d9eb'
         VERSION = '1.0.1' // This can be parameterized if needed
     }
 
@@ -39,12 +41,16 @@ pipeline {
             }
         }
 
-        stage('Login to DockerHub') {
-            steps {
-                // Login to DockerHub using Jenkins credentials
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
-                        echo 'Logged into DockerHub'
+        stages {
+            stage('Login to DockerHub') {
+                steps {
+                    script {
+                        withCredentials([string(credentialsId: DOCKER_CREDENTIALS, variable: 'DOCKER_TOKEN')]) {
+                            sh '''
+                                echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
+                            '''
+                            echo 'Successfully logged into DockerHub with token'
+                        }
                     }
                 }
             }
@@ -52,10 +58,14 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                // Push the Docker image to DockerHub
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
+                    // Use a "Secret Text" credential for Docker Hub token
+                    withCredentials([string(credentialsId: DOCKER_CREDENTIALS, variable: 'DOCKER_TOKEN')]) {
+                        sh '''
+                            echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
+                        '''
                         docker.image("${DOCKER_IMAGE}:${VERSION}").push()
+                        echo 'Docker image pushed successfully to DockerHub'
                     }
                 }
             }
