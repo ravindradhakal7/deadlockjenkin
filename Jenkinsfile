@@ -41,16 +41,14 @@ pipeline {
             }
         }
 
-        stages {
-            stage('Login to DockerHub') {
-                steps {
-                    script {
-                        withCredentials([string(credentialsId: DOCKER_CREDENTIALS, variable: 'DOCKER_TOKEN')]) {
-                            sh '''
-                                echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
-                            '''
-                            echo 'Successfully logged into DockerHub with token'
-                        }
+        stage('Login to DockerHub') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: DOCKER_CREDENTIALS, variable: 'DOCKER_TOKEN')]) {
+                        sh '''
+                            echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
+                        '''
+                        echo 'Successfully logged into DockerHub with token'
                     }
                 }
             }
