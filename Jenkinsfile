@@ -41,8 +41,13 @@ pipeline {
             steps {
                 // Build the Docker image
                 script {
-                    def version = sh(script: "${MAVEN_HOME}/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                    // def version = sh(script: "${MAVEN_HOME}/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                    // Ensure Maven is available by using the 'tool' step
+                    def maven = tool name: 'Maven 3', type: 'Maven'
                     
+                    // Extract version using Maven command
+                    def version = sh(script: "${maven}/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+
                     // Build Docker image with the dynamic version
                     echo "Building Docker image with version: ${version}"
                     docker.build("${DOCKER_IMAGE}:${version}")
@@ -71,7 +76,7 @@ pipeline {
                         sh '''
                             echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
                         '''
-                        def VERSION = sh(script: "${MAVEN_HOME}/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                        def VERSION = sh(script: "${maven}/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
                         docker.image("${DOCKER_IMAGE}:${VERSION}").push()
                         docker.image("${DOCKER_IMAGE}:${VERSION}").tag('latest')
                         docker.image("${DOCKER_IMAGE}:latest").push()
