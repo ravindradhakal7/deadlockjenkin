@@ -36,22 +36,16 @@ pipeline {
                     echo 'Code checkout complete.'
                 }
         }
-        stage('Extract Version') {
-            steps {
-                script {
-                    // Extract the version from pom.xml using Maven
-                    def version = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
-                    env.VERSION = version
-                    echo "Extracted Version: ${env.VERSION}"
-                }
-            }
-        }
 
         stage('Build') {
             steps {
                 // Build the Docker image
                 script {
-                    docker.build("${DOCKER_IMAGE}:${VERSION}")
+                    def version = readMavenPom(file: 'pom.xml').getVersion()
+                    
+                    // Build Docker image with the dynamic version
+                    echo "Building Docker image with version: ${version}"
+                    docker.build("${DOCKER_IMAGE}:${version}")
                 }
             }
         }
