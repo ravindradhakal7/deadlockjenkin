@@ -41,7 +41,7 @@ pipeline {
             steps {
                 // Build the Docker image
                 script {
-                    def version = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                    def version = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
                     
                     // Build Docker image with the dynamic version
                     echo "Building Docker image with version: ${version}"
@@ -71,7 +71,7 @@ pipeline {
                         sh '''
                             echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
                         '''
-                        def VERSION = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                        def VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
                         docker.image("${DOCKER_IMAGE}:${VERSION}").push()
                         docker.image("${DOCKER_IMAGE}:${VERSION}").tag('latest')
                         docker.image("${DOCKER_IMAGE}:latest").push()
