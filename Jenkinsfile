@@ -16,33 +16,30 @@ pipeline {
         EKS_CLUSTER_NAME = 'beautiful-alternative-sheepdog'  // EKS cluster name
         EKS_REGION = 'us-east-1'  // EKS region
         AWS_CREDENTIALS = '3086e787-624b-45ba-9d7e-13b3a57c987e'
-        POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
     }
-
 
     stages {
         stage('Checkout Code') {
             steps {
-                    echo 'Fetching code from GitHub repository.'
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: '*/main']], // Replace 'main' with your branch name
-                        doGenerateSubmoduleConfigurations: false,
-                        extensions: [],
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/ravindradhakal7/deadlocktest.git',
-                            credentialsId: '32d6cd06-b9ab-4237-89b9-f2728bcc5a98' // Use the ID of the credential you added
-                        ]]
-                    ])
-                    echo 'Code checkout complete.'
-                }
+                echo 'Fetching code from GitHub repository.'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']], // Replace 'main' with your branch name
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/ravindradhakal7/deadlocktest.git',
+                        credentialsId: '32d6cd06-b9ab-4237-89b9-f2728bcc5a98' // Use the ID of the credential you added
+                    ]]
+                ])
+                echo 'Code checkout complete.'
+            }
         }
 
         stage('Build') {
             steps {
-                // Build the Docker image
                 script {
-                   // Extract POM version dynamically
+                    // Extract POM version dynamically
                     def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
                     
                     // Print the extracted version
@@ -51,7 +48,6 @@ pipeline {
                     // Build Docker image with the dynamic version
                     echo "Building Docker image with version: ${POM_VERSION}"
                     sh "docker build --build-arg VERSION=${POM_VERSION} -t ${DOCKER_IMAGE}:${POM_VERSION} ."
-                }
                 }
             }
         }
@@ -72,7 +68,6 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Use a "Secret Text" credential for Docker Hub token
                     withCredentials([string(credentialsId: DOCKER_CREDENTIALS, variable: 'DOCKER_TOKEN')]) {
                         sh '''
                             echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
@@ -90,8 +85,8 @@ pipeline {
 
         stage('Cleanup') {
             steps {
-                // Remove the local Docker image to free up space
                 script {
+                    // Remove the local Docker image to free up space
                     sh "docker rmi ${DOCKER_IMAGE}:${POM_VERSION}"
                 }
             }
@@ -99,31 +94,25 @@ pipeline {
         
         stage('Clone GitHub Repository') {
             steps {
-                // Clone the repository containing the deployment.yaml file
-                // git url: "${GITHUB_REPO}", branch: "${GITHUB_BRANCH}"
                 git credentialsId: GITHUB_CREDENTIALS, url: "${GITHUB_REPO}", branch: "${GITHUB_BRANCH}"
             }
         }
 
         stage('Configure kubectl') {
             steps {
-                 script {
-                        // Use AmazonWebServicesCredentialsBinding to securely inject AWS credentials
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS]]) {
-                            // Now that AWS credentials are available, run the AWS CLI command
-                            sh '''
-                                # Configure AWS CLI with the access keys
-                                aws eks --region ${EKS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}
-                            '''
-                        }
-                 }
+                script {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS]]) {
+                        sh '''
+                            aws eks --region ${EKS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}
+                        '''
+                    }
+                }
             }
         }
 
         stage('Deploy to EKS') {
             steps {
                 script {
-                    // Apply the deployment.yaml file from the cloned repository
                     sh "kubectl apply -f deployment.yaml"
                 }
             }
