@@ -41,7 +41,7 @@ pipeline {
             steps {
                 // Build the Docker image
                 script {
-                    def version = sh(script: "${MAVEN_HOME}/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                    def version = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
                     
                     // Build Docker image with the dynamic version
                     echo "Building Docker image with version: ${version}"
