@@ -41,11 +41,12 @@ pipeline {
             steps {
                 // Build the Docker image
                 script {
-                    def version = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                    def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
                     
                     // Build Docker image with the dynamic version
-                    echo "Building Docker image with version: ${version}"
-                    docker.build("${DOCKER_IMAGE}:${version}")
+                    echo "Building Docker image with version: ${POM_VERSION}"
+                    docker build --build-arg VERSION=$POM_VERSION -t your-image-name:$POM_VERSION
+                    // docker.build("${DOCKER_IMAGE}:${version}")
                 }
             }
         }
