@@ -16,7 +16,7 @@ pipeline {
 
         EKS_CLUSTER_NAME = 'beautiful-alternative-sheepdog'  // EKS cluster name
         EKS_REGION = 'us-east-1'  // EKS region
-        AWS_CREDENTIALS = 'b26f9b18-5825-4778-960d-ce295bcafb49'
+        AWS_CREDENTIALS = '3086e787-624b-45ba-9d7e-13b3a57c987e'
     }
 
     parameters {
