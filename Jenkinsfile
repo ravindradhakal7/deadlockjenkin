@@ -85,8 +85,7 @@ pipeline {
                 }
             }
         }
-
-        stages {
+        
         stage('Clone GitHub Repository') {
             steps {
                 // Clone the repository containing the deployment.yaml file
@@ -112,8 +111,6 @@ pipeline {
                 }
             }
         }
-
-    }
 
     post {
         always {
