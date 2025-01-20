@@ -8,7 +8,6 @@ pipeline {
         DOCKER_USER = 'ravindradhakal' // Replace with your Docker Hub username
         DOCKER_CREDENTIALS = '2428d338-7ef1-47c4-8869-327b95a3d9eb'
         GITHUB_CREDENTIALS = '32d6cd06-b9ab-4237-89b9-f2728bcc5a98'
-        VERSION = '1.0.1' // This can be parameterized if needed
 
         KUBE_CONFIG_PATH = '/tmp/kubeconfig.yaml'  // Temporary path for kubeconfig
         GITHUB_REPO = 'https://github.com/ravindradhakal7/deadlocktest-k8s.git'
@@ -19,9 +18,6 @@ pipeline {
         AWS_CREDENTIALS = '3086e787-624b-45ba-9d7e-13b3a57c987e'
     }
 
-    parameters {
-        string(name: 'VERSION', defaultValue: '1.0.1', description: 'Version of the Docker image')
-    }
 
     stages {
         stage('Checkout Code') {
@@ -39,6 +35,16 @@ pipeline {
                     ])
                     echo 'Code checkout complete.'
                 }
+        }
+        stage('Extract Version') {
+            steps {
+                script {
+                    // Extract the version from pom.xml using Maven
+                    def version = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                    env.VERSION = version
+                    echo "Extracted Version: ${env.VERSION}"
+                }
+            }
         }
 
         stage('Build') {
