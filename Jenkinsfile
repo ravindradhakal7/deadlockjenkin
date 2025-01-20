@@ -7,7 +7,15 @@ pipeline {
         DOCKER_REGISTRY = 'https://index.docker.io/v1/'
         DOCKER_USER = 'ravindradhakal' // Replace with your Docker Hub username
         DOCKER_CREDENTIALS = '2428d338-7ef1-47c4-8869-327b95a3d9eb'
+        GITHUB_CREDENTIALS = '32d6cd06-b9ab-4237-89b9-f2728bcc5a98'
         VERSION = '1.0.1' // This can be parameterized if needed
+
+        KUBE_CONFIG_PATH = '/tmp/kubeconfig.yaml'  // Temporary path for kubeconfig
+        GITHUB_REPO = 'https://github.com/ravindradhakal7/deadlocktest-k8s.git'
+        GITHUB_BRANCH = 'main'  // Specify your branch
+
+        EKS_CLUSTER_NAME = 'beautiful-alternative-sheepdog'  // EKS cluster name
+        EKS_REGION = 'us-east-1'  // EKS region
     }
 
     parameters {
@@ -77,6 +85,34 @@ pipeline {
                 }
             }
         }
+
+        stages {
+        stage('Clone GitHub Repository') {
+            steps {
+                // Clone the repository containing the deployment.yaml file
+                // git url: "${GITHUB_REPO}", branch: "${GITHUB_BRANCH}"
+                git credentialsId: GITHUB_CREDENTIALS, url: "${GITHUB_REPO}", branch: "${GITHUB_BRANCH}"
+            }
+        }
+
+        stage('Configure kubectl') {
+            steps {
+                script {
+                    // Download the kubeconfig from your GitHub or use a predefined path
+                    sh "aws eks --region ${EKS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}"
+                }
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                script {
+                    // Apply the deployment.yaml file from the cloned repository
+                    sh "kubectl apply -f deployment.yaml"
+                }
+            }
+        }
+
     }
 
     post {
