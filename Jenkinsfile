@@ -16,6 +16,7 @@ pipeline {
 
         EKS_CLUSTER_NAME = 'beautiful-alternative-sheepdog'  // EKS cluster name
         EKS_REGION = 'us-east-1'  // EKS region
+        AWS_CREDENTIALS = 'b26f9b18-5825-4778-960d-ce295bcafb49'
     }
 
     parameters {
@@ -96,10 +97,16 @@ pipeline {
 
         stage('Configure kubectl') {
             steps {
-                script {
-                    // Download the kubeconfig from your GitHub or use a predefined path
-                    sh "aws eks --region ${EKS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}"
-                }
+                 script {
+                        // Use AmazonWebServicesCredentialsBinding to securely inject AWS credentials
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS]]) {
+                            // Now that AWS credentials are available, run the AWS CLI command
+                            sh '''
+                                # Configure AWS CLI with the access keys
+                                aws eks --region ${EKS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}
+                            '''
+                        }
+                 }
             }
         }
 
