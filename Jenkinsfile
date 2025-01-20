@@ -99,7 +99,7 @@ pipeline {
             steps {
                  script {
                         // Use AmazonWebServicesCredentialsBinding to securely inject AWS credentials
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS]]) {
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS]]) {
                             // Now that AWS credentials are available, run the AWS CLI command
                             sh '''
                                 # Configure AWS CLI with the access keys
