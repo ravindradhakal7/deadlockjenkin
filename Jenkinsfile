@@ -42,12 +42,16 @@ pipeline {
             steps {
                 // Build the Docker image
                 script {
-                    // def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
-                    echo "POM Version: ${env.POM_VERSION}"
+                   // Extract POM version dynamically
+                    def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                    
+                    // Print the extracted version
+                    echo "POM Version: ${POM_VERSION}"
+                    
                     // Build Docker image with the dynamic version
                     echo "Building Docker image with version: ${POM_VERSION}"
-                    docker build --build-arg VERSION=${env.POM_VERSION} -t your-image-name:${env.POM_VERSION}
-                    // docker.build("${DOCKER_IMAGE}:${version}")
+                    sh "docker build --build-arg VERSION=${POM_VERSION} -t ${DOCKER_IMAGE}:${POM_VERSION} ."
+                }
                 }
             }
         }
@@ -73,10 +77,11 @@ pipeline {
                         sh '''
                             echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
                         '''
-                        //def VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
-                        docker.image("${DOCKER_IMAGE}:${env.POM_VERSION}").push()
-                        docker.image("${DOCKER_IMAGE}:${env.POM_VERSION}").tag('latest')
-                        docker.image("${DOCKER_IMAGE}:latest").push()
+                        // Push the image to Docker Hub with the version tag
+                        sh "docker image ${DOCKER_IMAGE}:${POM_VERSION} push"
+                        // Tag and push the "latest" version
+                        sh "docker image ${DOCKER_IMAGE}:${POM_VERSION} tag ${DOCKER_IMAGE}:latest"
+                        sh "docker image ${DOCKER_IMAGE}:latest push"
                         echo 'Docker image pushed successfully to DockerHub'
                     }
                 }
@@ -87,7 +92,7 @@ pipeline {
             steps {
                 // Remove the local Docker image to free up space
                 script {
-                    sh "docker rmi ${DOCKER_IMAGE}:${env.POM_VERSION}"
+                    sh "docker rmi ${DOCKER_IMAGE}:${POM_VERSION}"
                 }
             }
         }
