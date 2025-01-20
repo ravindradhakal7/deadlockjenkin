@@ -16,6 +16,7 @@ pipeline {
         EKS_CLUSTER_NAME = 'beautiful-alternative-sheepdog'  // EKS cluster name
         EKS_REGION = 'us-east-1'  // EKS region
         AWS_CREDENTIALS = '3086e787-624b-45ba-9d7e-13b3a57c987e'
+        POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
     }
 
     stages {
@@ -40,7 +41,7 @@ pipeline {
             steps {
                 script {
                     // Extract POM version dynamically
-                    def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                    // def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
                     
                     // Print the extracted version
                     echo "POM Version: ${POM_VERSION}"
