@@ -72,6 +72,8 @@ pipeline {
                             echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
                         '''
                         docker.image("${DOCKER_IMAGE}:${VERSION}").push()
+                        docker.image("${DOCKER_IMAGE}:${VERSION}").tag('latest')
+                        docker.image("${DOCKER_IMAGE}:latest").push()
                         echo 'Docker image pushed successfully to DockerHub'
                     }
                 }
