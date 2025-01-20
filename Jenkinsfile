@@ -75,10 +75,9 @@ pipeline {
                         def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
 
                         // Push the image to Docker Hub with the version tag
-                        sh "docker image ${DOCKER_IMAGE}:${POM_VERSION} push"
-                        // Tag and push the "latest" version
-                        sh "docker image ${DOCKER_IMAGE}:${POM_VERSION} tag ${DOCKER_IMAGE}:latest"
-                        sh "docker image ${DOCKER_IMAGE}:latest push"
+                        sh "docker push ${DOCKER_IMAGE}:${POM_VERSION}"
+                        sh "docker tag ${DOCKER_IMAGE}:${POM_VERSION} ${DOCKER_IMAGE}:latest"
+                        sh "docker push ${DOCKER_IMAGE}:latest"
                         echo 'Docker image pushed successfully to DockerHub'
                     }
                 }
