@@ -41,8 +41,8 @@ pipeline {
             steps {
                 script {
                     // Extract POM version dynamically
-                    // def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
-                    
+                    def version = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                     echo "Version: ${version}"
                     // Print the extracted version
                     echo "POM Version: ${POM_VERSION}"
                     
