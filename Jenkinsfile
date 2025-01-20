@@ -41,9 +41,7 @@ pipeline {
             steps {
                 script {
                     // Extract POM version dynamically
-                    def version = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
-                     echo "Version: ${version}"
-                    // Print the extracted version
+                    def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
                     echo "POM Version: ${POM_VERSION}"
                     
                     // Build Docker image with the dynamic version
@@ -73,6 +71,9 @@ pipeline {
                         sh '''
                             echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
                         '''
+                        // Extract POM version dynamically
+                        def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+
                         // Push the image to Docker Hub with the version tag
                         sh "docker image ${DOCKER_IMAGE}:${POM_VERSION} push"
                         // Tag and push the "latest" version
@@ -87,6 +88,8 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
+                    // Extract POM version dynamically
+                    def POM_VERSION = sh(script: "/opt/homebrew/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
                     // Remove the local Docker image to free up space
                     sh "docker rmi ${DOCKER_IMAGE}:${POM_VERSION}"
                 }
